@@ -1,10 +1,16 @@
 import uuid
 
-from django.db import connection, IntegrityError
+from django.db import IntegrityError
 from django.test import TestCase
+try:
+    from django.utils.encoding import smart_unicode
+except ImportError:
+    from django.utils.encoding import smart_text as smart_unicode
 
-from uuidfield.tests.models import (AutoUUIDField, ManualUUIDField,
-    NamespaceUUIDField, BrokenNamespaceUUIDField, HyphenatedUUIDField)
+from uuidfield.tests.models import (
+    AutoUUIDField, ManualUUIDField,
+    NamespaceUUIDField, BrokenNamespaceUUIDField, HyphenatedUUIDField
+)
 
 
 class UUIDFieldTestCase(TestCase):
@@ -40,8 +46,7 @@ class UUIDFieldTestCase(TestCase):
         obj = HyphenatedUUIDField.objects.create(name='test')
         uuid = obj.uuid
 
-        self.assertTrue('-' in unicode(uuid))
-        self.assertTrue('-' in str(uuid))
+        self.assertTrue('-' in smart_unicode(uuid))
 
         self.assertEquals(len(uuid), 36)
 
@@ -56,9 +61,8 @@ class UUIDFieldTestCase(TestCase):
 
     def test_can_use_hyphenated_uuids_in_filter_and_get(self):
         obj = AutoUUIDField.objects.create()
-        obj_uuid = uuid.UUID(str(obj.uuid))
-        self.assertTrue('-' in unicode(obj_uuid))
-        self.assertTrue('-' in str(obj_uuid))
+        obj_uuid = uuid.UUID(smart_unicode(obj.uuid))
+        self.assertTrue('-' in smart_unicode(obj_uuid))
         inserted_obj = AutoUUIDField.objects.get(uuid=obj_uuid)
         filtered_obj = AutoUUIDField.objects.filter(uuid=obj_uuid)[0]
         self.assertEqual(inserted_obj.uuid, obj_uuid)

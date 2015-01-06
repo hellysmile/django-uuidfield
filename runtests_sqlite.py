@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 from django.conf import settings
 from optparse import OptionParser
 
@@ -23,6 +22,14 @@ if not settings.configured:
     )
 
 from django_nose import NoseTestSuiteRunner
+
+
+try:
+    # django 1.7 standalone app setup
+    import django
+    django.setup()
+except AttributeError:
+    pass
 
 
 from runtests import runtests

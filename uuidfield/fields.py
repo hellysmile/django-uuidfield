@@ -6,6 +6,11 @@ try:
     from django.utils.encoding import smart_unicode
 except ImportError:
     from django.utils.encoding import smart_text as smart_unicode
+try:
+    from django.utils import six
+except ImportError:
+    import six
+from django.utils.encoding import python_2_unicode_compatible
 
 try:
     # psycopg2 needs us to register the uuid type
@@ -15,6 +20,7 @@ except (ImportError, AttributeError):
     pass
 
 
+@python_2_unicode_compatible
 class StringUUID(uuid.UUID):
     def __init__(self, *args, **kwargs):
         # get around UUID's immutable setter
@@ -32,7 +38,7 @@ class StringUUID(uuid.UUID):
         return len(self.__str__())
 
 
-class UUIDField(Field):
+class UUIDField(six.with_metaclass(SubfieldBase, Field)):
     """
     A field which stores a UUID value in hex format. This may also have the
     Boolean attribute 'auto' which will set the value on initial save to a new
@@ -40,7 +46,7 @@ class UUIDField(Field):
     this with a DB constraint.
     """
     # TODO: support binary storage types
-    __metaclass__ = SubfieldBase
+    # __metaclass__ = SubfieldBase
 
     def __init__(self, version=4, node=None, clock_seq=None,
                  namespace=None, name=None, auto=False, hyphenate=False,
